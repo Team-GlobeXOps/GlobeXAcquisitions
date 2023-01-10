@@ -1,1 +1,18 @@
 # This video seems good, I'm less familiar with forests though: https://www.youtube.com/watch?v=bWF1-rhPh5E
+
+# InstallNewForest.ps1
+# Create New Forest, add Domain Controller
+$domainname = “globex.msft”
+$netbiosName = “GLOBEX”
+Import-Module ADDSDeployment
+Install-ADDSForest -CreateDnsDelegation:$false `
+-DatabasePath “C:\Windows\NTDS” `
+-DomainMode “Win2019” `
+-DomainName $domainname `
+-DomainNetbiosName $netbiosName `
+-ForestMode “Win2019” `
+-InstallDns:$true `
+-LogPath “C:\Windows\NTDS” `
+-NoRebootOnCompletion:$false `
+-SysvolPath “C:\Windows\SYSVOL” `
+-Force:$true
