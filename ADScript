@@ -13,6 +13,14 @@ foreach($User in $UserList) {
         UserPrincipalName = $new.GivenName.Substring(0,1) + $new.Surname + "@globex.com"
         Path = "OU=Employees, DC=yourdomain, DC=com"
         Enabled = $true
-    }
-    Get-ADUser $NewUser
+        }
+    Write-Output $NewUser
 }
+
+# TODO: Assigns the Windows Server VM a static IPv4 address
+# TODO: Assigns the Windows Server VM a DNS
+# TODO: Renames the Windows Server VM
+# TODO: Installs AD-Domain-Services
+# TODO: Creates an AD Forest
+# TODO: Creates Organizational Units (OU)
+# DONE: Takes a CSV files of users and creates AD users and adds them to the appropriate OUs
