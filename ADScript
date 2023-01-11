@@ -1,34 +1,36 @@
-$UserList = Import-Csv -Path 'dummy.csv'
+Import-Module ActiveDirectory
+Import-Module ADDSDeployment
 
+Add-WindowsFeature AD-Domain-Services
+
+# InstallNewForest.ps1
+# Create New Forest, add Domain Controller
+$domainname = “globex.msft”
+$netbiosName = “GLOBEX”
+Install-ADDSForest -CreateDnsDelegation:$false ` -DatabasePath “C:\Windows\NTDS” ` -DomainMode “Win2019” ` -DomainName $domainname ` -DomainNetbiosName $netbiosName ` -ForestMode “Win2019” ` -InstallDns:$true ` -LogPath “C:\Windows\NTDS” ` -NoRebootOnCompletion:$false ` -SysvolPath “C:\Windows\SYSVOL” ` -Force:$true
+
+# Organizational Unit Automation
+
+$OrgList = @("Marketing", "Finance", "HR", "Information", "Operations", "Technology")
+
+Foreach($Org in $OrgList) {
+New-ADOrganizationalUnit $Org}
+
+# Filepath should be updated for where the CSV to use is.
+$UserList = Import-Csv -Path 'new.csv'
+
+# User creation automation
 foreach($User in $UserList) {
-    $new = @{
+    $NewUser = @{
         Name = $User.first + " " + $User.last
+        GivenName = $User.first
+        SurName = $User.last
+        SamAccountName = $User.first + " " + $User.last
+        Department = $User.department
+        Title = $User.title
+        UserPrincipalName = $User.first.Substring(0,1) + $User.last + "@globex.com"
+        Path = "OU=" + $User.department + ", DC=globex, DC=com"
+        Enabled = $true
         }
-        Write-Output $new.Name
-    }# Import-Module ActiveDirectory
-# #Declare variables for Title, First Name, and Last Name
-
-# $firstname = "John"
-# $lastname = "Smith"
-# $lat = ""
-# $lon = ""
-
-# #Connect to Active Directory
-
-
-# #Loop through adding multiple employees with AAA in their names
-
-# function Add-User {
-#   Write-Output
-# }
-
-
-# for ($i=1; $i -le 5; $i++) {
-#   New-ADUser -Name "$firstName $lastName" -GivenName, "$firstName" -Surname, "$lastName" -SamAccountName, "$firstName $lastName" -UserPrincipalName "$firstName$lastName'@yourdomain.com'", -Path "OU=Employees, DC=yourdomain, DC=com" -$AccountPassword (ConvertTo-SecureString "P@ssw0rd" -AsPlainText -Force) -Enabled $true
-# }
-
-# #Confirm the new users have been added 
-
-# Get-ADUser -Filter {Name -like"AAA"}
-
-# #end 
+    New-ADUser $NewUser
+}
