@@ -1,7 +1,25 @@
 Import-Module ActiveDirectory
+Import-Module ADDSDeployment
 
-$UserList = Import-Csv -Path 'C:\Users\gordn\Downloads\new.csv'
+Add-WindowsFeature AD-Domain-Services
 
+# InstallNewForest.ps1
+# Create New Forest, add Domain Controller
+$domainname = “globex.msft”
+$netbiosName = “GLOBEX”
+Install-ADDSForest -CreateDnsDelegation:$false ` -DatabasePath “C:\Windows\NTDS” ` -DomainMode “Win2019” ` -DomainName $domainname ` -DomainNetbiosName $netbiosName ` -ForestMode “Win2019” ` -InstallDns:$true ` -LogPath “C:\Windows\NTDS” ` -NoRebootOnCompletion:$false ` -SysvolPath “C:\Windows\SYSVOL” ` -Force:$true
+
+# Organizational Unit Automation
+
+$OrgList = @("Marketing", "Finance", "HR", "Information", "Operations", "Technology")
+
+Foreach($Org in $OrgList) {
+New-ADOrganizationalUnit $Org}
+
+# Filepath should be updated for where the CSV to use is.
+$UserList = Import-Csv -Path 'new.csv'
+
+# User creation automation
 foreach($User in $UserList) {
     $NewUser = @{
         Name = $User.first + " " + $User.last
@@ -10,17 +28,9 @@ foreach($User in $UserList) {
         SamAccountName = $User.first + " " + $User.last
         Department = $User.department
         Title = $User.title
-        UserPrincipalName = $new.GivenName.Substring(0,1) + $new.Surname + "@globex.com"
-        Path = "OU=Employees, DC=yourdomain, DC=com"
+        UserPrincipalName = $User.first.Substring(0,1) + $User.last + "@globex.com"
+        Path = "OU=" + $User.department + ", DC=globex, DC=com"
         Enabled = $true
         }
-    Write-Output $NewUser
+    New-ADUser $NewUser
 }
-
-# TODO: Assigns the Windows Server VM a static IPv4 address
-# TODO: Assigns the Windows Server VM a DNS
-# TODO: Renames the Windows Server VM
-# TODO: Installs AD-Domain-Services
-# TODO: Creates an AD Forest
-# TODO: Creates Organizational Units (OU)
-# DONE: Takes a CSV files of users and creates AD users and adds them to the appropriate OUs

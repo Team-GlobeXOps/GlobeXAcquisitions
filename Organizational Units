@@ -1,6 +1,0 @@
-# Organizational Unit Automation
-
-$OrgList = @("Marketing", "Finance", "HR", "Information", "Operations", "Technology")
-
-Foreach($Org in $OrgList) {
-New-ADOrganizationalUnit $Org}
